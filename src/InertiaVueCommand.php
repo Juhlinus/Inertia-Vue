@@ -11,15 +11,19 @@ use SplFileInfo;
 class InertiaVueCommand extends Command
 {
     protected $signature = 'inertia-vue
-                            {--controller=Controller : Specify the controller to convert to Vue}';
+                            {--controller= : Specify the controller to convert to Vue}
+                            {--path= : Specify the js path of pages}
+                            {--stub= : Specify the stub path}';
 
     protected $description = 'Converts a Controller to an Inertia Vue File';
 
     public function handle()
     {
         $model = Str::before($this->option('controller'), 'Controller');
+        $path =  rtrim($this->option('path') ?? resource_path('js/Pages'), '/');
+        $stub =  rtrim($this->option('stub') ?? (__DIR__ . '/stubs'), '/');
 
-        $file = collect(File::allFiles(database_path('migrations/')))->filter(function(SplFileInfo $item) use($model) {
+        $file = collect(File::allFiles(database_path('migrations/')))->filter(function (SplFileInfo $item) use ($model) {
             $migration = 'create_' . Str::plural(strtolower($model)) . '_table.php';
 
             return Str::contains($item->getRelativePathname(), $migration);
@@ -45,9 +49,9 @@ class InertiaVueCommand extends Command
             '{{data-form-input-null}}' => $buildFields->pluck('{{data-form-input-null}}')->join('
         '),
         ], [
-            File::get(__DIR__.'/stubs/Index.vue.stub'),
-            File::get(__DIR__.'/stubs/Edit.vue.stub'),
-            File::get(__DIR__.'/stubs/Create.vue.stub'),
+            File::get($stub . '/Index.vue.stub'),
+            File::get($stub . '/Edit.vue.stub'),
+            File::get($stub . '/Create.vue.stub'),
         ]);
 
         [$indexVueFile, $editVueFile, $createVueFile] = $this->replaceWithData([
@@ -58,29 +62,31 @@ class InertiaVueCommand extends Command
             '{{primaryKey}}' => $primaryKey[1],
         ], [$indexVueFile, $editVueFile, $createVueFile]);
 
-        if (!File::exists(resource_path('js/Pages'))) {
-            File::makeDirectory(resource_path('js/Pages'));
+        if (!File::exists($path)) {
+            File::makeDirectory($path);
         }
 
-        if (!File::exists(resource_path('js/Pages/' . ucfirst(Str::plural($model))))) {
-            File::makeDirectory(resource_path('js/Pages/' . ucfirst(Str::plural($model))));
+        $jsModelPath = $path . '/' . ucfirst(Str::plural($model));
+
+        if (!File::exists($jsModelPath)) {
+            File::makeDirectory($jsModelPath);
         }
 
-        File::put(resource_path('js/Pages/' . ucfirst(Str::plural($model)) . '/Index.vue'), $indexVueFile);
-        File::put(resource_path('js/Pages/' . ucfirst(Str::plural($model)) . '/Create.vue'), $createVueFile);
-        File::put(resource_path('js/Pages/' . ucfirst(Str::plural($model)) . '/Edit.vue'), $editVueFile);
+        File::put($jsModelPath . '/Index.vue', $indexVueFile);
+        File::put($jsModelPath . '/Create.vue', $createVueFile);
+        File::put($jsModelPath . '/Edit.vue', $editVueFile);
     }
 
     private function replaceWithData(array $keysAndValues, array $files): array
     {
-        return collect($files)->map(function($item) use($keysAndValues) {
+        return collect($files)->map(function ($item) use ($keysAndValues) {
             return strtr($item, $keysAndValues);
         })->toArray();
     }
 
     private function buildFields(Collection $fields): Collection
     {
-        return $fields->map(function($item) {
+        return $fields->map(function ($item) {
             return [
                 '{{fields-head}}' => '<th class="px-6 pt-6 pb-4">' . ucfirst($item[1]) . '</th>',
                 '{{fields-data}}' => '
