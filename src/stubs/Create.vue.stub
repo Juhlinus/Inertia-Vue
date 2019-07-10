@@ -1,0 +1,50 @@
+<template>
+  <layout title="Create {{Model}}">
+    <h1 class="mb-8 font-bold text-3xl">
+      <inertia-link class="text-indigo-light hover:text-indigo-dark" :href="route('{{models}}.index')">{{Models}}</inertia-link>
+      <span class="text-indigo-light font-medium">/</span> Create
+    </h1>
+    <div class="bg-white rounded shadow overflow-hidden max-w-lg">
+      <form @submit.prevent="submit">
+        <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+          {{input-fields}}
+        </div>
+        <div class="px-8 py-4 bg-grey-lightest border-t border-grey-lighter flex justify-end items-center">
+          <loading-button :loading="sending" class="btn-indigo" type="submit">Create {{Model}}</loading-button>
+        </div>
+      </form>
+    </div>
+  </layout>
+</template>
+
+<script>
+import Layout from '@/Shared/Layout'
+import LoadingButton from '@/Shared/LoadingButton'
+import SelectInput from '@/Shared/SelectInput'
+import TextInput from '@/Shared/TextInput'
+
+export default {
+  components: {
+    Layout,
+    LoadingButton,
+    SelectInput,
+    TextInput,
+  },
+  remember: 'form',
+  data() {
+    return {
+      sending: false,
+      form: {
+        {{data-form-input-null}}
+      },
+    }
+  },
+  methods: {
+    submit() {
+      this.sending = true
+      this.$inertia.post(this.route('{{models}}.store'), this.form)
+        .then(() => this.sending = false)
+    },
+  },
+}
+</script>

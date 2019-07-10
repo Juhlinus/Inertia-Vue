@@ -1,0 +1,29 @@
+{
+    "name": "juhlinus/inertia-vue",
+    "description": "A laravel frontend command to turn your Controllers code to Vue Views",
+    "version": "0.0.1",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Linus Juhlin",
+            "email": "juhlinus@gmail.com"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^5.8",
+        "inertiajs/inertia-laravel": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "InertiaVue\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "InertiaVue\\InertiaVueServiceProvider"
+            ]
+        }
+    }
+}
