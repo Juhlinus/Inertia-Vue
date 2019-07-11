@@ -20,6 +20,8 @@ class InertiaVueCommand extends Command
     public function handle()
     {
         $model =$this->option('model');
+        $path =  rtrim($this->option('path') ?? resource_path('js/Pages'), '/');
+        $stub =  rtrim($this->option('stub') ?? (__DIR__ . '/stubs'), '/');
 
         $file = collect(File::allFiles(database_path('migrations/')))->filter(function (SplFileInfo $item) use ($model) {
             $migration = 'create_' . Str::plural(strtolower($model)) . '_table.php';
