@@ -11,17 +11,15 @@ use SplFileInfo;
 class InertiaVueCommand extends Command
 {
     protected $signature = 'inertia-vue
-                            {--controller= : Specify the controller to convert to Vue}
+                            {--model=Model : Specify the Model to convert to Vue}
                             {--path= : Specify the js path of pages}
                             {--stub= : Specify the stub path}';
 
-    protected $description = 'Converts a Controller to an Inertia Vue File';
+    protected $description = 'Converts a Model to an Inertia Vue File';
 
     public function handle()
     {
-        $model = Str::before($this->option('controller'), 'Controller');
-        $path =  rtrim($this->option('path') ?? resource_path('js/Pages'), '/');
-        $stub =  rtrim($this->option('stub') ?? (__DIR__ . '/stubs'), '/');
+        $model =$this->option('model');
 
         $file = collect(File::allFiles(database_path('migrations/')))->filter(function (SplFileInfo $item) use ($model) {
             $migration = 'create_' . Str::plural(strtolower($model)) . '_table.php';
