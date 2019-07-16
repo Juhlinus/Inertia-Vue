@@ -37,10 +37,12 @@ class InertiaVueCommand extends Command
 
         $buildFields = $this->buildFields($fields);
 
-        [$indexVueFile, $editVueFile, $createVueFile] = $this->replaceWithData([
+        [$indexVueFile, $editVueFile, $createVueFile, $showVueFile] = $this->replaceWithData([
             '{{fields-head}}' => $buildFields->pluck('{{fields-head}}')->join('
             '),
             '{{fields-data}}' => $buildFields->pluck('{{fields-data}}')->join('
+            '),
+            '{{fields-show-data}}' => $buildFields->pluck('{{fields-show-data}}')->join('
             '),
             '{{input-fields}}' => $buildFields->pluck('{{input-fields}}')->join('
           '),
@@ -52,15 +54,16 @@ class InertiaVueCommand extends Command
             File::get($stub . '/Index.vue.stub'),
             File::get($stub . '/Edit.vue.stub'),
             File::get($stub . '/Create.vue.stub'),
+            File::get($stub . '/Show.vue.stub'),
         ]);
 
-        [$indexVueFile, $editVueFile, $createVueFile] = $this->replaceWithData([
+        [$indexVueFile, $editVueFile, $createVueFile, $showVueFile] = $this->replaceWithData([
             '{{Models}}' => ucfirst(Str::plural($model)),
             '{{Model}}' => ucfirst($model),
             '{{models}}' => strtolower(Str::plural($model)),
             '{{model}}' => strtolower($model),
             '{{primaryKey}}' => $primaryKey[1],
-        ], [$indexVueFile, $editVueFile, $createVueFile]);
+        ], [$indexVueFile, $editVueFile, $createVueFile, $showVueFile]);
 
         if (!File::exists($path)) {
             File::makeDirectory($path);
@@ -75,6 +78,7 @@ class InertiaVueCommand extends Command
         File::put($jsModelPath . '/Index.vue', $indexVueFile);
         File::put($jsModelPath . '/Create.vue', $createVueFile);
         File::put($jsModelPath . '/Edit.vue', $editVueFile);
+        File::put($jsModelPath . '/Show.vue', $showVueFile);
     }
 
     private function replaceWithData(array $keysAndValues, array $files): array

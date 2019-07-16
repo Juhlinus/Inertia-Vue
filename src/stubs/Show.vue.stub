@@ -1,0 +1,29 @@
+<template>
+  <div title="{{Model}}">
+    <h1>{{Model}}</h1>
+    <div>
+      <inertia-link :href="route('{{models}}.index')">
+        <span>Show</span>
+        <span>{{Model}}</span>
+      </inertia-link>
+    </div>
+    <div>
+      <table>
+        <tr>
+          {{fields-head}}
+        </tr>
+        <tr>
+          {{fields-show-data}}
+        </tr>
+      </table>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    {{model}}: Object,
+  }
+}
+</script>
