@@ -1,76 +1,32 @@
 <template>
-  <layout title="{{Models}}">
-    <h1 class="mb-8 font-bold text-3xl">{{Models}}</h1>
-    <div class="mb-6 flex justify-between items-center">
-      <search-filter v-model="form.search" class="w-full max-w-sm mr-4" @reset="reset">
-        <label class="block text-grey-darkest">Trashed:</label>
-        <select v-model="form.trashed" class="mt-1 w-full form-select">
-          <option :value="null" />
-          <option value="with">With Trashed</option>
-          <option value="only">Only Trashed</option>
-        </select>
-      </search-filter>
-      <inertia-link class="btn-indigo" :href="route('{{models}}.create')">
+  <div title="{{Models}}">
+    <h1>{{Models}}</h1>
+    <div>
+      <inertia-link :href="route('{{models}}.create')">
         <span>Create</span>
-        <span class="hidden md:inline">{{Model}}</span>
+        <span>{{Model}}</span>
       </inertia-link>
     </div>
-    <div class="bg-white rounded shadow overflow-x-auto">
-      <table class="w-full whitespace-no-wrap">
-        <tr class="text-left font-bold">
-          {{fields-head}}
+    <div>
+      <table>
+        <tr>
+        {{fields-head}}
         </tr>
-        <tr v-for="{{model}} in {{models}}.data" :key="{{model}}.{{primaryKey}}" class="hover:bg-grey-lightest focus-within:bg-grey-lightest">
+        <tr v-for="{{model}} in {{models}}" :key="{{model}}.{{primaryKey}}">
           {{fields-data}}
         </tr>
-        <tr v-if="{{models}}.data.length === 0">
-          <td class="border-t px-6 py-4" colspan="4">No {{models}} found.</td>
+        <tr v-if="{{models}}.length === 0">
+          <td colspan="4">No {{models}} found.</td>
         </tr>
       </table>
     </div>
-    <pagination :links="{{models}}.links" />
-  </layout>
+  </div>
 </template>
 
 <script>
-import _ from 'lodash'
-import Icon from '@/Shared/Icon'
-import Layout from '@/Shared/Layout'
-import Pagination from '@/Shared/Pagination'
-import SearchFilter from '@/Shared/SearchFilter'
-
 export default {
-  components: {
-    Icon,
-    Layout,
-    Pagination,
-    SearchFilter,
-  },
   props: {
     {{models}}: Object,
-    filters: Object,
-  },
-  data() {
-    return {
-      form: {
-        search: this.filters.search,
-        trashed: this.filters.trashed,
-      },
-    }
-  },
-  watch: {
-    form: {
-      handler: _.throttle(function() {
-        let query = _.pickBy(this.form)
-        this.$inertia.replace(this.route('{{models}}', Object.keys(query).length ? query : { remember: 'forget' }))
-      }, 150),
-      deep: true,
-    },
-  },
-  methods: {
-    reset() {
-      this.form = _.mapValues(this.form, () => null)
-    },
-  },
+  }
 }
 </script>

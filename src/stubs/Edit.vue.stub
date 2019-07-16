@@ -1,45 +1,31 @@
 <template>
-  <layout :title="`${form.first_name} ${form.last_name}`">
-    <h1 class="mb-8 font-bold text-3xl">
-      <inertia-link class="text-indigo-light hover:text-indigo-dark" :href="route('{{models}}.index')">{{Models}}</inertia-link>
-      <span class="text-indigo-light font-medium">/</span>
+  <div>
+    <h1>
+      <inertia-link :href="route('{{models}}.index')">{{Models}}</inertia-link>
+      <span>/</span>
       Title
     </h1>
-    <trashed-message v-if="{{model}}.deleted_at" class="mb-6" @restore="restore">
+    <div v-if="{{model}}.deleted_at" @restore="restore">
       This {{model}} has been deleted.
-    </trashed-message>
-    <div class="bg-white rounded shadow overflow-hidden max-w-lg">
+    </div>
+    <div >
       <form @submit.prevent="submit">
-        <div class="p-8 -mr-6 -mb-8 flex flex-wrap">
+        <div>
           {{input-fields}}
         </div>
-        <div class="px-8 py-4 bg-grey-lightest border-t border-grey-lighter flex items-center">
-          <button v-if="!{{model}}.deleted_at" class="text-red hover:underline" tabindex="-1" type="button" @click="destroy">Delete {{Model}}</button>
-          <loading-button :loading="sending" class="btn-indigo ml-auto" type="submit">Update {{Model}}</loading-button>
+        <div>
+          <button v-if="!{{model}}.deleted_at" tabindex="-1" type="button" @click="destroy">Delete {{Model}}</button>
+          <button :loading="sending" type="submit">Update {{Model}}</button>
         </div>
       </form>
     </div>
-  </layout>
+  </div>
 </template>
 
 <script>
-import Layout from '@/Shared/Layout'
-import LoadingButton from '@/Shared/LoadingButton'
-import SelectInput from '@/Shared/SelectInput'
-import TextInput from '@/Shared/TextInput'
-import TrashedMessage from '@/Shared/TrashedMessage'
-
 export default {
-  components: {
-    Layout,
-    LoadingButton,
-    SelectInput,
-    TextInput,
-    TrashedMessage,
-  },
   props: {
     {{model}}: Object,
-    organizations: Array,
   },
   remember: 'form',
   data() {

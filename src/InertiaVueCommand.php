@@ -88,14 +88,14 @@ class InertiaVueCommand extends Command
     {
         return $fields->map(function ($item) {
             return [
-                '{{fields-head}}' => '<th class="px-6 pt-6 pb-4">' . ucfirst($item[1]) . '</th>',
+                '{{fields-head}}' => '<th>' . ucfirst($item[1]) . '</th>',
                 '{{fields-data}}' => '
-            <td class="border-t">
-              <inertia-link class="px-6 py-4 flex items-center" :href="route(\'{{models}}.edit\', {{model}}.id)" tabindex="-1">
+            <td>
+              <inertia-link :href="route(\'{{models}}.edit\', {{model}}.id)" tabindex="-1">
                 {{ {{model}}.' . $item[1] . ' }}
               </inertia-link>
             </td>',
-                '{{input-fields}}' => '<text-input v-model="form.' . $item[1] . '" :errors="$page.errors.' . $item[1] . '" class="pr-6 pb-8 w-full lg:w-1/2" label="' . ucfirst($item[1]) . '" />',
+                '{{input-fields}}' => '<text-input v-model="form.' . $item[1] . '" :errors="$page.errors.' . $item[1] . '" label="' . ucfirst($item[1]) . '" />',
                 '{{data-form-input}}' => $item[1] . ': this.{{model}}.' . $item[1] . ',',
                 '{{data-form-input-null}}' => $item[1] . ': null,',
             ];
