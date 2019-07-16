@@ -61,6 +61,7 @@ class InertiaVueCommand extends Command
         '),
             '{{data-form-input-null}}' => $buildFields->pluck('{{data-form-input-null}}')->join('
         '),
+            '{{data-attribute}}' => empty($this->option('data')) ? '' : '.data',
         ], [
             File::get($stub . '/Index.vue.stub'),
             File::get($stub . '/Edit.vue.stub'),

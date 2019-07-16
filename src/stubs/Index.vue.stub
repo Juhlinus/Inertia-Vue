@@ -9,10 +9,10 @@
         <tr>
         {{fields-head}}
         </tr>
-        <tr v-for="{{model}} in {{models}}" :key="{{model}}.{{primaryKey}}">
+        <tr v-for="{{model}} in {{models}}{{data-attribute}}" :key="{{model}}.{{primaryKey}}">
           {{fields-data}}
         </tr>
-        <tr v-if="{{models}}.length === 0">
+        <tr v-if="{{models}}{{data-attribute}}.length === 0">
           <td colspan="4">No {{models}} found.</td>
         </tr>
       </table>
