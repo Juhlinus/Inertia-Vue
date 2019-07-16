@@ -14,7 +14,8 @@
         </div>
         <div>
           <button v-if="!{{model}}.deleted_at" tabindex="-1" type="button" @click="destroy">Delete {{Model}}</button>
-          <button :loading="sending" type="submit">Update {{Model}}</button>
+          <button type="button" @click="view">View {{Model}}</button>
+          <button type="submit">Update {{Model}}</button>
         </div>
       </form>
     </div>
@@ -49,6 +50,9 @@ export default {
       if (confirm('Are you sure you want to restore this {{model}}?')) {
         this.$inertia.put(this.route('{{models}}.restore', this.{{model}}.id))
       }
+    },
+    view() {
+      this.$inertia.replace(this.route('{{models}}.show', this.{{model}}.id))
     },
   },
 }
