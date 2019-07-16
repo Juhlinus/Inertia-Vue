@@ -99,7 +99,11 @@ class InertiaVueCommand extends Command
                 {{ {{model}}.' . $item[1] . ' }}
               </inertia-link>
             </td>',
-                '{{input-fields}}' => '<text-input v-model="form.' . $item[1] . '" :errors="$page.errors.' . $item[1] . '" label="' . ucfirst($item[1]) . '" />',
+                '{{fields-show-data}}' => '
+            <td>
+                {{ {{model}}.' . $item[1] . ' }}
+            </td>',
+                '{{input-fields}}' => '<input v-model="form.' . $item[1] . '" :errors="$page.errors.' . $item[1] . '" label="' . ucfirst($item[1]) . '" />',
                 '{{data-form-input}}' => $item[1] . ': this.{{model}}.' . $item[1] . ',',
                 '{{data-form-input-null}}' => $item[1] . ': null,',
             ];
