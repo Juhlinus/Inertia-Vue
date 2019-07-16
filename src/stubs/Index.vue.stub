@@ -1,12 +1,9 @@
 <template>
-  <div title="{{Models}}">
-    <h1>{{Models}}</h1>
-    <div>
-      <inertia-link :href="route('{{models}}.create')">
-        <span>Create</span>
-        <span>{{Model}}</span>
-      </inertia-link>
-    </div>
+  <div title="{{Models}} Index">
+    <h1>
+      <inertia-link :href="route('{{models}}.index')">{{Models}}</inertia-link>
+      <span>/</span> Index
+    </h1>
     <div>
       <table>
         <tr>

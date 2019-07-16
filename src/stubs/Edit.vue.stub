@@ -1,9 +1,8 @@
 <template>
-  <div>
+  <div title="Edit {{Model}}">
     <h1>
       <inertia-link :href="route('{{models}}.index')">{{Models}}</inertia-link>
-      <span>/</span>
-      Title
+      <span>/</span> Edit
     </h1>
     <div v-if="{{model}}.deleted_at" @restore="restore">
       This {{model}} has been deleted.
