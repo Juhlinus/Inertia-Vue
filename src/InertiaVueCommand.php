@@ -115,7 +115,8 @@ class InertiaVueCommand extends Command
             <td>
                 {{ {{model}}.' . $item[1] . ' }}
             </td>',
-                '{{input-fields}}' => '<input v-model="form.' . $item[1] . '" :errors="$page.errors.' . $item[1] . '" label="' . ucfirst($item[1]) . '" />',
+                '{{input-fields}}' => '<label>' . ucfirst($item[1]) . '</label>
+            <input v-model="form.' . $item[1] . '" :errors="$page.errors.' . $item[1] . '" />',
                 '{{data-form-input}}' => $item[1] . ': this.{{model}}.' . $item[1] . ',',
                 '{{data-form-input-null}}' => $item[1] . ': null,',
             ];
