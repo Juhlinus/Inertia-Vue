@@ -11,14 +11,25 @@ use SplFileInfo;
 class InertiaVueCommand extends Command
 {
     protected $signature = 'inertia-vue
-                            {--model=Model : Specify the Model to convert to Vue}
+                            {--model= : Specify the Model to convert to Vue}
                             {--path= : Specify the js path of pages}
-                            {--stub= : Specify the stub path}';
+                            {--stub= : Specify the stub path}
+                            {--data=false : Whether or not the model data is accessesed through the `data` attribute}';
 
     protected $description = 'Converts a Model to an Inertia Vue File';
 
     public function handle()
     {
+        if (empty($this->option('model'))) {
+            $this->error('Please specify a model');
+            $this->info('inertia-vue
+    --model= : Specify the Model to convert to Vue
+    --path= : Specify the js path of pages (Default: resources/js/Pages)
+    --stub= : Specify the stub path (Default: package stub directory)
+    --data= : Whether or not the model data is accessesed through the `data` attribute (Default: false)');
+            die();
+        }
+
         $model =$this->option('model');
         $path =  rtrim($this->option('path') ?? resource_path('js/Pages'), '/');
         $stub =  rtrim($this->option('stub') ?? (__DIR__ . '/stubs'), '/');
