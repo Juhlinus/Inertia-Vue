@@ -1,6 +1,6 @@
 # <p align="center">Inertie-Vue</p>
 
-<p align="center">A laravel frontend command to turn your Controllers code to Vue Components</p>
+<p align="center">A laravel frontend command to turn your Models to Vue Components</p>
 
 ## <p align="center">Installation</p>
 
@@ -10,8 +10,10 @@ Require the package via composer
 
 ## <p align="center">Usage</p>
 
-Simply specify which controller(will change this later to model/migration) you wish to create your views from.
-
-`php artisan inertia-vue --controller=CategoryController`
-
-And you're done!
+```
+inertia-vue
+    --model= : Specify the Model to convert to Vue
+    --path= : Specify the js path of pages (Default: resources/js/Pages)
+    --stub= : Specify the stub path (Default: package stub directory)
+    --data= : Whether or not the model data is accessesed through the `data` attribute (Default: false)
+```
