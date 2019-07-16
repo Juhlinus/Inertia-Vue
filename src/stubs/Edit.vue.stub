@@ -27,7 +27,6 @@ export default {
   props: {
     {{model}}: Object,
   },
-  remember: 'form',
   data() {
     return {
       sending: false,

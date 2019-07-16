@@ -19,7 +19,6 @@
 
 <script>
 export default {
-  remember: 'form',
   data() {
     return {
       sending: false,
