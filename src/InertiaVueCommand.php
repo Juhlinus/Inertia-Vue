@@ -2,11 +2,11 @@
 
 namespace InertiaVue;
 
+use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
-use SplFileInfo;
+use Symfony\Component\Finder\SplFileInfo;
 
 class InertiaVueCommand extends Command
 {
@@ -21,76 +21,95 @@ class InertiaVueCommand extends Command
     public function handle()
     {
         if (empty($this->option('model'))) {
-            $this->error('Please specify a model');
-            $this->info('inertia-vue
-    --model= : Specify the Model to convert to Vue
-    --path= : Specify the js path of pages (Default: resources/js/Pages)
-    --stub= : Specify the stub path (Default: package stub directory)
-    --data= : Whether or not the model data is accessesed through the `data` attribute (Default: false)');
-            die();
+            if (!$this->confirm('Would you like to generate views from all your models?')) {
+                $this->error('Please specify a model');
+                $this->info('inertia-vue
+                --model= : Specify the Model to convert to Vue
+                --path= : Specify the js path of pages (Default: resources/js/Pages)
+                --stub= : Specify the stub path (Default: package stub directory)
+                --data= : Whether or not the model data is accessesed through the `data` attribute (Default: false)');
+                die();
+            }
+
+            $this->confirm('Make sure that migrations exist for the models you wish to generate to views.');
         }
 
-        $model =$this->option('model');
+        $allFiles = collect(File::allFiles(database_path('migrations/')));
+
+        $model = $this->option('model');
         $path =  rtrim($this->option('path') ?? resource_path('js/Pages'), '/');
         $stub =  rtrim($this->option('stub') ?? (__DIR__ . '/stubs'), '/');
 
-        $file = collect(File::allFiles(database_path('migrations/')))->filter(function (SplFileInfo $item) use ($model) {
-            $migration = 'create_' . Str::plural(strtolower($model)) . '_table.php';
+        $this->info('Found ' . count($allFiles) . ' migrations.');
+        $files = $allFiles->filter(function ($file) use ($model) {
+            $this->comment($file->getFilenameWithoutExtension());
 
-            return Str::contains($item->getRelativePathname(), $migration);
-        })->first();
+            if ($model === null) {
+                return true;
+            } else if ($model) {
+                $migration = 'create_' . Str::plural(strtolower($model)) . '_table.php';
 
-        preg_match_all('/\$table->([A-Za-z]+)\(\'([A-Za-z_+]+)\'\);/', $file->getContents(), $matches);
+                return Str::contains($file, $migration);
+            }
 
-        $fields = collect($matches[1])->zip($matches[2]);
+            return false;
+        });
 
-        $primaryKey = $fields->shift();
+        $files->each(function ($file) use ($stub, $path) {
+            $model = Str::after(Str::before($file->getFilenameWithoutExtension(), '_table'), '_create_');
 
-        $buildFields = $this->buildFields($fields);
+            preg_match_all('/\$table->([A-Za-z]+)\(\'([A-Za-z_+]+)\'\);/', $file->getContents(), $matches);
 
-        [$indexVueFile, $editVueFile, $createVueFile, $showVueFile] = $this->replaceWithData([
-            '{{fields-head}}' => $buildFields->pluck('{{fields-head}}')->join('
+            $fields = collect($matches[1])->zip($matches[2]);
+
+            $primaryKey = $fields->shift();
+
+            $buildFields = $this->buildFields($fields);
+
+            [$indexVueFile, $editVueFile, $createVueFile, $showVueFile] = $this->replaceWithData([
+                '{{fields-head}}' => $buildFields->pluck('{{fields-head}}')->join('
+                '),
+                '{{fields-data}}' => $buildFields->pluck('{{fields-data}}')->join('
+                '),
+                '{{fields-show-data}}' => $buildFields->pluck('{{fields-show-data}}')->join('
+                '),
+                '{{input-fields}}' => $buildFields->pluck('{{input-fields}}')->join('
+              '),
+                '{{data-form-input}}' => $buildFields->pluck('{{data-form-input}}')->join('
             '),
-            '{{fields-data}}' => $buildFields->pluck('{{fields-data}}')->join('
+                '{{data-form-input-null}}' => $buildFields->pluck('{{data-form-input-null}}')->join('
             '),
-            '{{fields-show-data}}' => $buildFields->pluck('{{fields-show-data}}')->join('
-            '),
-            '{{input-fields}}' => $buildFields->pluck('{{input-fields}}')->join('
-          '),
-            '{{data-form-input}}' => $buildFields->pluck('{{data-form-input}}')->join('
-        '),
-            '{{data-form-input-null}}' => $buildFields->pluck('{{data-form-input-null}}')->join('
-        '),
-            '{{data-attribute}}' => empty($this->option('data')) ? '' : '.data',
-        ], [
-            File::get($stub . '/Index.vue.stub'),
-            File::get($stub . '/Edit.vue.stub'),
-            File::get($stub . '/Create.vue.stub'),
-            File::get($stub . '/Show.vue.stub'),
-        ]);
+                '{{data-attribute}}' => empty($this->option('data')) ? '' : '.data',
+            ], [
+                File::get($stub . '/Index.vue.stub'),
+                File::get($stub . '/Edit.vue.stub'),
+                File::get($stub . '/Create.vue.stub'),
+                File::get($stub . '/Show.vue.stub'),
+            ]);
 
-        [$indexVueFile, $editVueFile, $createVueFile, $showVueFile] = $this->replaceWithData([
-            '{{Models}}' => ucfirst(Str::plural($model)),
-            '{{Model}}' => ucfirst($model),
-            '{{models}}' => strtolower(Str::plural($model)),
-            '{{model}}' => strtolower($model),
-            '{{primaryKey}}' => $primaryKey[1],
-        ], [$indexVueFile, $editVueFile, $createVueFile, $showVueFile]);
+            [$indexVueFile, $editVueFile, $createVueFile, $showVueFile] = $this->replaceWithData([
+                '{{Models}}' => ucfirst($model),
+                '{{Model}}' => ucfirst(Str::singular($model)),
+                '{{models}}' => strtolower($model),
+                '{{model}}' => strtolower(Str::singular($model)),
+                '{{primaryKey}}' => $primaryKey[1],
+            ], [$indexVueFile, $editVueFile, $createVueFile, $showVueFile]);
 
-        if (!File::exists($path)) {
-            File::makeDirectory($path);
-        }
+            if (!File::exists($path)) {
+                File::makeDirectory($path);
+            }
 
-        $jsModelPath = $path . '/' . ucfirst(Str::plural($model));
+            $jsModelPath = $path . '/' . ucfirst($model);
 
-        if (!File::exists($jsModelPath)) {
-            File::makeDirectory($jsModelPath);
-        }
+            if (!File::exists($jsModelPath)) {
+                File::makeDirectory($jsModelPath);
+            }
 
-        File::put($jsModelPath . '/Index.vue', $indexVueFile);
-        File::put($jsModelPath . '/Create.vue', $createVueFile);
-        File::put($jsModelPath . '/Edit.vue', $editVueFile);
-        File::put($jsModelPath . '/Show.vue', $showVueFile);
+            File::put($jsModelPath . '/Index.vue', $indexVueFile);
+            File::put($jsModelPath . '/Create.vue', $createVueFile);
+            File::put($jsModelPath . '/Edit.vue', $editVueFile);
+            File::put($jsModelPath . '/Show.vue', $showVueFile);
+        });
     }
 
     private function replaceWithData(array $keysAndValues, array $files): array
