@@ -20,7 +20,9 @@ class InertiaVueCommand extends Command
 
     public function handle()
     {
-        if (empty($this->option('model'))) {
+        $model = $this->option('model');
+
+        if (empty($model)) {
             if (!$this->confirm('Would you like to generate views from all your models?')) {
                 $this->error('Please specify a model');
                 $this->info('inertia-vue
@@ -34,28 +36,14 @@ class InertiaVueCommand extends Command
             $this->confirm('Make sure that migrations exist for the models you wish to generate to views.');
         }
 
-        $allFiles = collect(File::allFiles(database_path('migrations/')));
+        $models = $this->findModels($model);
 
-        $model = $this->option('model');
+        $migrations = $this->matchModelsWithMigrations($models);
+
         $path =  rtrim($this->option('path') ?? resource_path('js/Pages'), '/');
         $stub =  rtrim($this->option('stub') ?? (__DIR__ . '/stubs'), '/');
 
-        $this->info('Found ' . count($allFiles) . ' migrations.');
-        $files = $allFiles->filter(function ($file) use ($model) {
-            $this->comment($file->getFilenameWithoutExtension());
-
-            if ($model === null) {
-                return true;
-            } else if ($model) {
-                $migration = 'create_' . Str::plural(strtolower($model)) . '_table.php';
-
-                return Str::contains($file, $migration);
-            }
-
-            return false;
-        });
-
-        $files->each(function ($file) use ($stub, $path) {
+        $migrations->each(function ($file) use ($stub, $path) {
             $model = Str::after(Str::before($file->getFilenameWithoutExtension(), '_table'), '_create_');
 
             preg_match_all('/\$table->([A-Za-z]+)\(\'([A-Za-z_+]+)\'\);/', $file->getContents(), $matches);
@@ -99,7 +87,7 @@ class InertiaVueCommand extends Command
                 File::makeDirectory($path);
             }
 
-            $jsModelPath = $path . '/' . ucfirst($model);
+            $jsModelPath = $path . '/' . Str::studly($model);
 
             if (!File::exists($jsModelPath)) {
                 File::makeDirectory($jsModelPath);
@@ -140,5 +128,40 @@ class InertiaVueCommand extends Command
                 '{{data-form-input-null}}' => $item[1] . ': null,',
             ];
         });
+    }
+
+    private function findModels(?string $model): Collection
+    {
+        $files = collect(File::files(app_path()));
+
+        return empty($model)
+            ? $files
+            : $files->filter(function ($file) use ($model) {
+                return $file->getFilenameWithoutExtension() === $model;
+            })->values();
+    }
+
+    private function matchModelsWithMigrations(Collection $models): Collection
+    {
+        $allMigrations = collect(File::allFiles(database_path('migrations/')));
+
+        return $allMigrations->filter(function ($file) use ($models) {
+            $model = $this->migrationToModel($file->getFilenameWithoutExtension());
+
+            return collect($models->map->getFilenameWithoutExtension())->contains($model);
+        })->values();
+    }
+
+    private function migrationToModel(string $migration): string
+    {
+        return Str::studly(
+            Str::singular(
+                Str::after(
+                    Str::before(
+                        $migration, '_table'
+                    ), '_create_'
+                )
+            )
+        );
     }
 }
