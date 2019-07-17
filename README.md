@@ -12,7 +12,7 @@ Require the package via composer
 
 ```
 inertia-vue
-    --model= : Specify the Model to convert to Vue
+    --model= : Specify the Model to convert to Vue (Note: Leaving this empty will generate views from all Models)
     --path= : Specify the js path of pages (Default: resources/js/Pages)
     --stub= : Specify the stub path (Default: package stub directory)
     --data= : Whether or not the model data is accessesed through the `data` attribute (Default: false)
