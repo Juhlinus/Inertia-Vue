@@ -1,4 +1,4 @@
-# <p align="center">Inertie-Vue</p>
+# <p align="center">Inertia-Vue</p>
 
 <p align="center">A laravel frontend command to turn your Models to Vue Components</p>
 
